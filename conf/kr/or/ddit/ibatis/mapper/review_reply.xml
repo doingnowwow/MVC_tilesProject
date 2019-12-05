@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="review_reply">
+	<typeAlias alias="rrVO" type="kr.or.ddit.vo.ReviewReplyVO"/>
+	
+	<select id="rrList" parameterClass="map" resultClass="rrVO">
+		select * from review_reply 
+		where rr_status='n'
+		  and review_no=#review_no#
+		order by rr_group, rr_seq
+	</select>
+	
+	<insert id="insertReviewReply" parameterClass="rrVO">
+		<selectKey keyProperty="rr_no">
+			select rr_seq.nextval from dual
+		</selectKey>
+		insert into review_reply(RR_NO,REVIEW_NO,RR_CONTENT,RR_GROUP,RR_SEQ,RR_DEPTH,MEM_ID)
+		values(#rr_no#,#review_no#,#rr_content#,#rr_no#,#rr_seq#,#rr_depth#,#mem_id#)
+	</insert>
+	
+	<select id="incrementSEQ" parameterClass="rrVO" resultClass="String">
+		select max(rr_seq)+1 from review_reply
+		 where rr_status='n'
+		   and rr_group=#rr_group#
+	</select>
+	
+	<update id="updateSEQ" parameterClass="rrVO">
+		update review_reply
+		   set rr_seq=rr_seq+1
+		 where rr_status='n'
+		   and rr_group=#rr_group#
+		   and rr_seq > #rr_seq#
+	</update>
+	
+	<insert id="insertReviewReReply" parameterClass="rrVO">
+		<selectKey keyProperty="rr_no">
+			select rr_seq.nextval from dual
+		</selectKey>
+		insert into review_reply(RR_NO,REVIEW_NO,RR_CONTENT,RR_GROUP,RR_SEQ,RR_DEPTH,MEM_ID)
+		values(#rr_no#,#review_no#,#rr_content#,#rr_group#,#rr_seq#,#rr_depth#,#mem_id#)
+	</insert>
+	
+	<update id="deleteReviewReply" parameterClass="map">
+		update review_reply
+		   set rr_status='y'
+		 where rr_no=#rr_no#
+	</update>
+	
+	<update id="updateReviewReply" parameterClass="rrVO">
+		update review_reply
+		   set rr_content=#rr_content#
+		 where rr_no=#rr_no#
+	</update>
+</sqlMap>

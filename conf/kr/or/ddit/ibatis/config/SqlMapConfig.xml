@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMapConfig      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map Config 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-config-2.dtd">
+
+<sqlMapConfig>
+	<properties resource="kr/or/ddit/ibatis/config/SqlMapConfig.properties" />
+	<settings cacheModelsEnabled="true" enhancementEnabled="true"
+		lazyLoadingEnabled="true" maxRequests="32" maxSessions="10"
+		maxTransactions="5" useStatementNamespaces="true" />
+
+<transactionManager type="JDBC">
+<!-- 		<dataSource type="DBCP">  -->
+<!-- 			<property name="driverClassName" value="${driver}"/> -->
+<!-- 			<property name="url" value="${url}"/> -->
+<!-- 			<property name="username" value="${username}"/> -->
+<!-- 			<property name="password" value="${password}"/> -->
+<!-- 			<property name="maxActive" value="10"/> -->
+<!-- 			<property name="maxWait" value="-1"/> -->
+<!-- 			<property name="maxIdle" value="6"/> -->
+<!-- 			<property name="removeAbandoned" value="true"/> -->
+<!-- 			<property name="removeAbandTimeout" value="60"/> -->
+<!-- 		</dataSource> -->
+	<dataSource type="JNDI">
+		<property name="DBJndiContext" value="java:comp/env/jdbc/ddit"/>
+	</dataSource>
+</transactionManager> 
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/member.xml"/> 
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/free.xml" />
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/freefile.xml" />
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/free_reply.xml" />
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/company.xml" />
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/notice.xml" /> 
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/noticefile.xml" /> 
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/event.xml" /> 
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/eventfile.xml" /> 
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/event_reply.xml" />
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/qna.xml" />
+ 	<sqlMap resource="kr/or/ddit/ibatis/mapper/review.xml" /> 
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/qnafile.xml" />
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/drink.xml" />
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/drinkfile.xml" />
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/reviewfile.xml" />
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/review_reply.xml" />
+	<sqlMap resource="kr/or/ddit/ibatis/mapper/zipcode.xml" />
+</sqlMapConfig>

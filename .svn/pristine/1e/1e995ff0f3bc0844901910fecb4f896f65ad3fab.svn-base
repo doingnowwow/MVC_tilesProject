@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+    
+<sqlMap namespace="free">
+    <typeAlias alias="freeVO" type="kr.or.ddit.vo.FreeVO"/>
+
+ 	<resultMap  id="freeResultMap" class="freeVO">
+		    <result property="free_no" column="free_no" />
+			<result property="free_title" column="free_title" />
+			<result property="free_content" column="free_content" />
+			<result property="free_reg_date" column="free_reg_date" />
+			<result property="free_hit" column="free_hit" />
+			<result property="free_ip" column="free_ip" />
+			<result property="mem_id" column="mem_id" />
+			<result property="free_status" column="free_status" />
+			
+			<result property="items" column="free_no" select="freefile.freefileList"/>  
+		
+   </resultMap>
+ 
+ 
+ 
+   <sql id="selectAll">
+      SELECT *
+        FROM FREE
+       WHERE FREE_STATUS = 'n'
+   </sql>
+	
+    
+   <select id="freeInfo" parameterClass="map" resultMap="freeResultMap">
+     <include refid="selectAll"/>
+				AND FREE_NO = #free_no# 
+   </select>
+   
+   
+   
+   	<sql id="searchCondition">
+		<dynamic prepend="AND">
+			<isNotEmpty property="search_keyword" open="(" close=")">
+				<isEqual property="search_keycode" compareValue="TOTAL">
+					 FREE_TITLE like '%'||#search_keyword#||'%'
+				 or  MEM_ID like '%'||#search_keyword#||'%'
+			 	</isEqual>
+				<isEqual property="search_keycode" compareValue="TITLE">
+					 FREE_TITLE like '%'||#search_keyword#||'%'
+			 	</isEqual>
+				<isEqual property="search_keycode" compareValue="WRITER">
+					 MEM_ID like '%'||#search_keyword#||'%'
+			 	</isEqual>
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+	
+	
+   <update id="updateBOHIT" parameterClass="map">
+      UPDATE FREE
+         SET FREE_HIT = FREE_HIT + 1
+       WHERE FREE_NO = #free_no#
+   </update>
+   
+   
+   <select id="freeList" parameterClass="map" resultClass="freeVO">
+     select b.* 
+		  from(select rownum rnum, a.*
+				from(select * from free where free_status='n'
+					<include refid="searchCondition"/>
+				)a)b
+		 <![CDATA[
+		  where b.rnum <= #startCount#
+		    and b.rnum >= #endCount#
+		 ]]> 
+		 order by b.rnum desc
+   
+   </select>  
+   
+   
+    
+   <insert id="insertFreeInfo" parameterClass="freeVO">      
+         <selectKey keyProperty="free_no" resultClass="String">
+            SELECT FREE_SEQ.NEXTVAL FROM DUAL
+         </selectKey>
+         INSERT INTO FREE(FREE_NO
+         					,FREE_IP
+							,FREE_TITLE
+							,FREE_CONTENT
+							,MEM_ID
+					)
+                   VALUES(#free_no#,
+                   		#free_ip#,
+                        #free_title#,
+                        #free_content#,
+                        #mem_id#
+                    )      
+      
+      
+      </insert>
+   <update id="updateFreeInfo" parameterClass="freeVO">
+      UPDATE FREE
+         SET FREE_TITLE = #free_title#
+            ,FREE_CONTENT = #free_content#
+            ,FREE_IP = #free_ip#
+       WHERE FREE_NO = #free_no#
+   </update> 
+
+
+   <update id="deleteFreeInfo" parameterClass="map">
+      UPDATE FREE
+         SET FREE_STATUS ='y'
+       WHERE FREE_NO = #free_no#
+   </update>   
+   
+   
+      <select id="totalCount" parameterClass="map" resultClass="string">
+         SELECT COUNT(*) 
+           FROM FREE
+      	  WHERE FREE_STATUS ='n'   
+      <include refid="searchCondition"/>   
+      
+      </select>
+      
+</sqlMap>
+
+    
+    

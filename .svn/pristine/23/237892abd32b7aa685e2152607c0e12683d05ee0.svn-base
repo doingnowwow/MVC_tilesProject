@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="drinkfile">
+<typeAlias alias="drinkfileVO" type="kr.or.ddit.vo.DrinkFileVO"/>
+    
+    
+	<statement id="drinkFileList" resultClass="drinkfileVO">
+		SELECT * 
+		FROM DRINK_FILE
+		WHERE DRINK_NO = #drink_no#
+	</statement>  
+
+  
+    <insert id="insertDrinkFile" parameterClass="drinkfileVO">
+    	<selectKey keyProperty="dfile_seq">
+    		SELECT DRINKFILE_SEQ.NEXTVAL FROM DUAL
+    	</selectKey>
+    	INSERT INTO DRINK_FILE(DFILE_SEQ
+					,DRINK_NO
+					,DFILE_NAME
+					,DFILE_SAVE_NAME
+					,DFILE_CONTENT_TYPE
+					,DFILE_SIZE
+					,DFILE_REG_DATE)
+					VALUES(#dfile_seq#
+						 ,#drink_no#
+						 ,#dfile_name#
+						 ,#dfile_save_name#
+						 ,#dfile_content_type#
+						 ,#dfile_size#
+						 ,sysdate)
+    </insert>
+	
+	<select id="drinkfileInfo" parameterClass="map" resultClass="drinkfileVO">
+		SELECT * 
+		  FROM DRINK_FILE
+		 WHERE DFILE_SEQ=#dfile_seq#
+	
+	</select>
+</sqlMap>

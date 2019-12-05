@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap    
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map  2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="member">
+	<typeAlias alias="memberVO" type="kr.or.ddit.vo.MemberVO" />
+
+	<sql id="selectAll">
+		SELECT
+		*
+		FROM MEMBER
+		WHERE MEM_DELETE ='n'
+	
+	</sql>
+	
+	
+	
+	<sql id="searchCondition">
+		<dynamic prepend="AND">
+				<isNotEmpty property="search_keyword"  open="(" close=")">
+			
+					<isEqual property="search_keycode" compareValue="ALL">
+						MEM_ID  LIKE '%' || #search_keyword# || '%'
+						OR	MEM_NAME LIKE '%' || #search_keyword# || '%'
+					 	OR MEM_NICKNAME LIKE '%'|| #search_keyword# || '%'
+					 	
+					</isEqual>	
+					<isEqual property="search_keycode" compareValue="NAME">
+							MEM_NAME LIKE '%' || #search_keyword# || '%'
+					</isEqual>	
+					<isEqual property="search_keycode" compareValue="NICK">
+							 MEM_NICKNAME LIKE '%'|| #search_keyword# || '%'
+					</isEqual>
+					<isEqual property="search_keycode" compareValue="ID">
+							MEM_ID  LIKE '%' || #search_keyword# || '%'
+					</isEqual>
+				</isNotEmpty>
+		</dynamic>
+	</sql>
+	
+	
+		<select id="checkId" parameterClass="String" resultClass="String">
+		
+			SELECT MEM_ID FROM MEMBER
+			WHERE MEM_ID = #mem_id#
+		
+		</select>
+	
+	
+	<select id="totalCount" parameterClass="map" resultClass="string">
+
+		SELECT COUNT(*), COUNT(1),COUNT(mem_id)
+		FROM MEMBER
+		WHERE MEM_DELETE ='n'
+		AND MEM_ADMIN = 'n'
+		<include refid="searchCondition" />
+	</select>
+	
+	
+	
+	
+
+
+
+	<select id="memberInfo" parameterClass="map" resultClass="memberVO">
+		<include refid="selectAll" />
+		AND MEM_ID = #mem_id#
+		<dynamic>
+
+			<isNotEmpty property="mem_pass" prepend="AND">
+				 MEM_PASS = #mem_pass#
+
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+
+	<select id="memberList" resultClass="memberVO" parameterClass="map">
+
+		SELECT
+		*
+		FROM MEMBER
+	
+		WHERE MEM_ADMIN ='n'
+		<include refid="searchCondition"/>
+
+	</select>
+
+	<update id="updateMember" parameterClass="memberVO">
+	UPDATE MEMBER
+	
+	SET 
+	
+	MEM_PASS = #mem_pass#
+		
+	,MEM_NICKNAME = #mem_nickname#
+		
+	,MEM_TEL = #mem_tel#
+	,MEM_EMAIL = #mem_email#
+	
+	WHERE MEM_ID = #mem_id#
+	</update>
+	
+	
+	<update id="deleteMember" parameterClass="map">
+		UPDATE MEMBER
+			SET
+		 MEM_DELETE ='y'
+			WHERE MEM_ID = #mem_id#
+	
+	
+	</update>
+	
+	<insert id="insertMember" parameterClass="memberVO">
+	INSERT INTO MEMBER ( 
+						 MEM_ID,
+						 MEM_PASS,
+						 MEM_NAME,
+						 MEM_BIR,
+						 MEM_NICKNAME,
+						 MEM_TEL,
+						 MEM_EMAIL
+									 )
+					 
+	VALUES( 
+	
+						#mem_id#, 
+						#mem_pass#,
+						#mem_name#,
+						#mem_bir#, 
+						#mem_nickname#,
+						#mem_tel#, 
+						#mem_email#
+				
+								   )
+						   
+		   <selectKey keyProperty="mem_id" resultClass="String">
+				select MEM_ID from member where MEM_ID = #mem_id#
+				
+			</selectKey>
+	
+	
+	
+	
+	</insert>
+	
+	
+	<select id="searchId" parameterClass="map" resultClass="String">
+	
+	SELECT MEM_ID FROM MEMBER
+	WHERE MEM_NAME = #mem_name#
+	AND MEM_BIR = #mem_bir#
+	AND MEM_EMAIL = #mem_email#
+	
+	</select>
+	
+		<select id="searchPwd" parameterClass="map" resultClass="String">
+	
+	SELECT MEM_PASS FROM MEMBER
+	WHERE MEM_NAME = #mem_name#
+	AND MEM_ID = #mem_id#
+	AND MEM_EMAIL = #mem_email#
+	
+	</select>
+	
+
+</sqlMap>    

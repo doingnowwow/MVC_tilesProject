@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="event"> 
+    <typeAlias alias="eventVO" type="kr.or.ddit.vo.EventVO"/>
+   	   
+   <resultMap  id="eventResultMap" class="eventVO">
+      <result property="event_no" column="event_no" />
+      <result property="event_title" column="event_title" />
+      <result property="event_content" column="event_content" />
+      <result property="event_start" column="event_start" />
+      <result property="event_end" column="event_end" />
+      <result property="event_hit" column="event_hit" />
+<!--       <result property="efile_seq" column="efile_seq" /> -->
+      <result property="com_id" column="com_id" />
+      <result property="com_name" column="com_name" />
+<!--       <result property="event_status" column="event_status" /> -->
+      <result property="items" column="event_no" select="eventfile.fileItemList"/>
+   </resultMap> 
+   
+      <sql id="searchCondition">
+      <dynamic prepend="AND">
+         <isNotEmpty property="search_keyword" open="(" close=")">
+         
+            <isEqual property="search_keycode" compareValue="TOTAL">
+                EVENT_TITLE LIKE '%' ||#search_keyword#||'%'
+                OR EVENT_CONTENT LIKE '%'||#search_keyword#||'%'
+                OR COM_ID LIKE '%'||#search_keyword#||'%'
+            </isEqual>
+            <isEqual property="search_keycode" compareValue="TITLE">
+                EVENT_TITLE LIKE '%' ||#search_keyword#||'%'
+            </isEqual>
+            <isEqual property="search_keycode" compareValue="CONTENT">
+                EVENT_CONTENT LIKE '%' ||#search_keyword#||'%'
+            </isEqual>
+            <isEqual property="search_keycode" compareValue="WRITER">
+                COM_ID LIKE '%' ||#search_keyword#||'%'
+            </isEqual>
+         </isNotEmpty>
+      </dynamic>
+      <!-- @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ -->
+   </sql>
+   <sql id="selectAll"> 
+      SELECT * FROM EVENT 
+       WHERE EVENT_STATUS = 'n'  
+   </sql>
+   
+   <select id="eventList" parameterClass="map" resultClass="eventVO"> 
+  	SELECT B.*
+		FROM(	
+			SELECT ROWNUM RNUM, A.*
+			FROM (select * from event where event_status='n'
+				 <include refid="searchCondition"/>
+			)A)B
+		 <![CDATA[ 
+		  where B.RNUM <= #startCount#
+		    and B.RNUM >= #endCount#
+		 ]]> 
+		 ORDER BY B.RNUM DESC
+   </select>
+   
+   <select id="eventInfo" parameterClass="map" resultMap="eventResultMap">
+      SELECT * FROM EVENT
+       WHERE EVENT_STATUS = 'n'
+         AND EVENT_NO = #event_no#
+   </select>
+   
+    <insert id="insertEventInfo" parameterClass="eventVO">      
+         <selectKey keyProperty="event_no" >
+            SELECT EVENT_SEQ.NEXTVAL FROM DUAL
+         </selectKey>
+         INSERT INTO EVENT(EVENT_NO
+						  ,EVENT_TITLE
+						  ,COM_ID
+						  ,COM_NAME
+						  ,EVENT_START
+						  ,EVENT_END
+						  ,EVENT_CONTENT
+						  ,EVENT_STATUS
+							)
+                   VALUES(#event_no#,
+                          #event_title#,
+                          #com_id#,
+                          #com_name#,
+                          #event_start#,
+                          #event_end#,
+                          #event_content#,
+                          'n'
+                       )      
+      </insert>
+   
+  <update id="updateEventInfo" parameterClass="eventVO">
+      UPDATE EVENT
+         SET EVENT_TITLE = #event_title#,
+             EVENT_CONTENT = #event_content#,
+             EVENT_START = #event_start#,
+             EVENT_END = #event_end#
+       WHERE EVENT_NO = #event_no#
+   </update> 
+   
+      <update id="updateEventHIT" parameterClass="map">
+      UPDATE EVENT
+         SET EVENT_HIT = EVENT_HIT + 1
+       WHERE EVENT_NO = #event_no#
+   </update>
+   
+   <update id="deleteEventInfo" parameterClass="map">   
+   		UPDATE EVENT
+   		   SET EVENT_STATUS = 'y'
+   		 WHERE EVENT_NO=#event_no#
+   </update>
+ 
+    <select id="totalCount" parameterClass="map" resultClass="string">
+		SELECT COUNT(*)	FROM EVENT
+		 WHERE EVENT_STATUS ='n'	
+    <include refid="searchCondition"/> 
+   </select>
+ 
+</sqlMap>

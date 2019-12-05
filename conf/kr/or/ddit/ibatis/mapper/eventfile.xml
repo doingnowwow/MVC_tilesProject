@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap    
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map  2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="eventfile"> 
+	<typeAlias alias="eventfileVO" type="kr.or.ddit.vo.EventFileVO" />
+	
+	<statement id="fileItemList" resultClass="eventfileVO">
+		SELECT *
+		FROM EVENT_FILE
+	  WHERE EVENT_NO = #event_no#	 
+	</statement>
+	
+	<insert id="insertFileItem" parameterClass="eventfileVO">
+		<selectKey keyProperty="efile_seq">
+		 	SELECT EVENTFILE_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO EVENT_FILE 
+					(
+					EFILE_SEQ,
+					EFILE_NAME,
+					EFILE_SAVE_NAME,
+					EVENT_CONTENT_TYPE,
+					EFILE_SIZE,
+					EFILE_REG_DATE,
+					EVENT_NO
+					)
+			   values
+			   		(
+					 #efile_seq#
+					,#efile_name#
+					,#efile_save_name#
+					,#event_content_type#
+					,#efile_size#
+					,sysdate
+					,#event_no#
+					)
+	</insert>
+	<select id="fileItemInfo" parameterClass="map" resultClass="eventfileVO">
+		SELECT * FROM EVENT_FILE
+		WHERE EFILE_SEQ = #efile_seq#	
+	</select>
+</sqlMap>    

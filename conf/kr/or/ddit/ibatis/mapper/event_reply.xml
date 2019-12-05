@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="event_reply">
+
+
+    <typeAlias alias="eventreplyVO" type="kr.or.ddit.vo.EventReplyVO"/>
+
+	
+	<select id="erList" parameterClass="map" resultClass="eventreplyVO">
+		select * from event_reply 
+		where er_status='n'
+		  and event_no=#event_no#
+	</select>
+	
+	<insert id="insertEventReply" parameterClass="eventreplyVO">
+		<selectKey keyProperty="er_no">
+			select er_seq.nextval from dual
+		</selectKey>
+		insert into event_reply(ER_NO,EVENT_NO,ER_CONTENT,ER_GROUP,ER_SEQ,ER_DEPTH,MEM_ID)
+		values(#er_no#,#event_no#,#er_content#,#er_no#,#er_seq#,#er_depth#,#mem_id#)
+	</insert>
+	
+	<select id="incrementSEQ" parameterClass="eventreplyVO" resultClass="String">
+		select max(er_seq)+1 from event_reply
+		 where er_status='n'
+		   and er_group=#er_group#
+	</select>
+	
+	<update id="updateSEQ" parameterClass="eventreplyVO">
+		update event_reply
+		   set er_seq=er_seq+1
+		 where er_status='n'
+		   and er_group=#er_group#
+		   and er_seq > #er_seq#
+	</update>
+	
+	<insert id="insertEventReReply" parameterClass="eventreplyVO">
+		<selectKey keyProperty="er_no">
+			select er_seq.nextval from dual
+		</selectKey>
+		insert into event_reply(ER_NO,EVENT_NO,ER_CONTENT,ER_GROUP,ER_SEQ,ER_DEPTH,MEM_ID)
+		values(#er_no#,#event_no#,#er_content#,#er_group#,#er_seq#,#er_depth#,#mem_id#)
+	</insert>
+	
+	<update id="deleteEventReply" parameterClass="map">
+		update event_reply
+		   set er_status='y'
+		 where er_no=#er_no#
+	</update>
+	
+	<update id="updateEventReply" parameterClass="eventreplyVO">
+		update event_reply
+		   set er_content=#er_content#
+		 where er_no=#er_no#
+	</update>
+	
+</sqlMap>

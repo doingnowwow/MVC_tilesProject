@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="review">
+	<typeAlias alias="reviewVO" type="kr.or.ddit.vo.ReviewVO"/>
+	
+	<resultMap class="reviewVO" id="reviewResultMap">
+		<result property="review_no" column="review_no"/>
+		<result property="review_title" column="review_title"/>
+		<result property="mem_id" column="mem_id"/>
+		<result property="review_ip" column="review_ip"/>
+		<result property="review_content" column="review_content"/>
+		<result property="review_hit" column="review_hit"/>
+		<result property="review_reg_date" column="review_reg_date"/>
+		<result property="review_status" column="review_status"/>
+		<result property="review_like" column="review_like"/>
+		<result property="drink_no" column="drink_no"/>
+		<result property="drink_name" column="drink_name"/>
+		<result property="items" column="review_no" select="reviewFile.fileItemList" />
+	</resultMap>
+	
+	<sql id="searchCondition">
+		<dynamic prepend="AND">
+			<isNotEmpty property="search_keyword" open="(" close=")">
+				<isEqual property="search_keycode" compareValue="TOTAL">
+				     review_title like '%'||#search_keyword#||'%'
+				 or  mem_id like '%'||#search_keyword#||'%' 
+			 	</isEqual>
+				<isEqual property="search_keycode" compareValue="TITLETT">
+					 REVIEW_TITLE like '%'||#search_keyword#||'%' 
+			 	</isEqual>
+				<isEqual property="search_keycode" compareValue="WRITER">
+					 mem_id like '%'||#search_keyword#||'%'
+			 	</isEqual>
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+	
+	<sql id="alignCondition">
+		<dynamic>
+			<isNotEmpty property="align_keycode" >
+				<isEqual property="align_keycode" compareValue="HIT">
+				     order by b.review_hit
+			 	</isEqual>
+				<isEqual property="align_keycode" compareValue="LIKE">
+					 order by b.review_like
+			 	</isEqual>
+				<isEqual property="align_keycode" compareValue="DISLIKE">
+					 order by b.review_like desc
+			 	</isEqual>
+				<isEqual property="align_keycode" compareValue="DATE">
+					 order by b.review_reg_date
+			 	</isEqual>
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+	
+	<select id="reviewList" parameterClass="map" resultClass="reviewVO">
+		select rownum as rnum,
+			   z.*
+		  from(select 
+		  			  b.REVIEW_NO, 
+					  b.REVIEW_TITLE, 
+					  b.REVIEW_CONTENT, 
+					  b.REVIEW_REG_DATE, 
+					  b.REVIEW_HIT, 
+					  b.REVIEW_LIKE, 
+					  b.REVIEW_IP, 
+					  b.MEM_ID, 
+					  c.drink_name as DRINK_NO, 
+					  b.REVIEW_STATUS 
+				  from(select a.*
+						from(select * from review where review_status='n'
+							 <include refid="searchCondition"/>
+						)a)b, drink c
+				 where b.drink_no=c.drink_no
+				 <include refid="alignCondition"/>)z 
+				 <![CDATA[
+		 		  where rownum <= #startCount# 
+		 		    and rownum >= #endCount# 
+		 		 ]]>
+				 order by rnum desc
+	</select>
+	
+	<select id="totalCount" parameterClass="map" resultClass="String">
+		select count(*) from review
+		 where review_status='n'
+		<include refid="searchCondition"/>
+	</select>
+	
+	<update id="updateHit" parameterClass="map">
+		update review
+		   set review_hit = review_hit+1
+		 where review_no = #review_no#
+	</update>
+	
+	<select id="reviewInfo" parameterClass="map" resultMap="reviewResultMap">
+		select a.REVIEW_NO, 
+			  a.REVIEW_TITLE, 
+			  a.REVIEW_CONTENT, 
+			  a.REVIEW_REG_DATE, 
+			  a.REVIEW_HIT, 
+			  a.REVIEW_LIKE, 
+			  a.REVIEW_IP, 
+			  a.MEM_ID, 
+			  b.drink_name as DRINK_NAME,
+			  a.drink_no as DRINK_NO, 
+			  a.REVIEW_STATUS 
+		  from review a, drink b
+		where a.review_no=#review_no#
+		  and a.review_status='n'
+		  and a.drink_no = b.drink_no
+	</select>
+	
+	<insert id="insertReview" parameterClass="reviewVO">
+		<selectKey keyProperty="review_no" resultClass="String">
+			select review_seq.nextval from dual
+		</selectKey>
+		insert into review(REVIEW_NO,REVIEW_TITLE,REVIEW_CONTENT,REVIEW_LIKE,REVIEW_IP,MEM_ID,DRINK_NO)
+		values(#review_no#,#review_title#,#review_content#,#review_like#,#review_ip#,#mem_id#,#drink_no#)
+	</insert>
+	
+	<update id="updateReview" parameterClass="reviewVO">
+		update review
+		   set review_title=#review_title#,
+		       review_ip=#review_ip#,
+		       review_content=#review_content#,
+		       review_like=#review_like#,
+		       drink_no=#drink_no#
+		 where review_no=#review_no#
+	</update>
+	
+	<update id="deleteReview" parameterClass="map">
+		update review
+		   set review_status='y'
+		 where review_no=#review_no#
+	</update>
+</sqlMap>

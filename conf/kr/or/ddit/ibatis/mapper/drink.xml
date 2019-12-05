@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+    
+<sqlMap namespace="drink">
+    <typeAlias alias="drinkVO" type="kr.or.ddit.vo.DrinkVO"/>
+    
+    
+    <resultMap  id="drinkResultMap" class="drinkVO">
+		    <result property="drink_no" column="drink_no" />
+			<result property="drink_add" column="drink_add" />
+			<result property="drink_reg_date" column="drink_reg_date" />
+			<result property="drink_info" column="drink_info" />
+			<result property="drink_link" column="drink_link" />
+			<result property="drink_add2" column="drink_add2" />
+			<result property="drink_zip" column="drink_zip" />
+		
+			<result property="drink_hit" column="drink_hit" />
+			<result property="com_id" column="com_id" />
+			<result property="drink_name" column="drink_name" />
+			<result property="drink_status" column="drink_status" />
+			<result property="drink_tel" column="drink_tel" />
+			
+		 	<result property="items" column="drink_no" select="drinkfile.drinkFileList"/> 
+	
+   </resultMap>
+    
+   
+    <sql id="selectAll">
+      SELECT *
+        FROM drink
+       WHERE drink_status = 'n'
+   </sql>
+
+	<insert id="insertDrinkInfo" parameterClass="drinkVO">      
+         <selectKey keyProperty="drink_no" resultClass="String">
+            SELECT DRINK_SEQ.NEXTVAL FROM DUAL
+         </selectKey>
+         INSERT INTO DRINK(DRINK_NO
+							,DRINK_NAME
+							,DRINK_ADD
+							,DRINK_INFO
+							,DRINK_LINK
+							,DRINK_TEL
+							,DRINK_ZIP
+							,DRINK_ADD2
+							,COM_ID
+					)
+                   VALUES(#drink_no#,
+                        #drink_name#,
+                        #drink_add#,
+                        #drink_info#,
+                        #drink_link#,
+                        #drink_tel#,
+                        #drink_zip#,
+                        #drink_add2#,
+                        #com_id#
+                    )      
+      
+      
+      </insert>
+
+
+   	<sql id="searchCondition">
+		<dynamic prepend="AND">
+			<isNotEmpty property="search_keyword" open="(" close=")">
+				<isEqual property="search_keycode" compareValue="TOTAL">
+					 DRINK_NAME like '%'||#search_keyword#||'%'
+				 or  DRINK_ADD like '%'||#search_keyword#||'%'
+			 	</isEqual>
+				<isEqual property="search_keycode" compareValue="NAME">
+					 DRINK_NAME like '%'||#search_keyword#||'%'
+			 	</isEqual>
+				<isEqual property="search_keycode" compareValue="TITLE">
+					 DRINK_ADD like '%'||#search_keyword#||'%'
+			 	</isEqual> 
+			 
+			</isNotEmpty>
+	
+		</dynamic>
+	</sql>
+	
+	
+	<sql id="alignCondition">
+			<dynamic>
+				<isNotEmpty property="align_keycode" >
+					<isEqual property="align_keycode" compareValue="HIT">
+					     order by b.drink_hit
+				 	</isEqual>
+			
+					<isEqual property="align_keycode" compareValue="DATE">
+						 order by b.drink_reg_date
+				 	</isEqual>
+				</isNotEmpty>
+			</dynamic>
+		</sql>
+	
+
+    
+    <select id="drinkList" parameterClass="map" resultClass="drinkVO">
+        select rownum as rnum,
+			   z.*
+		  from(select b.*
+				  from(select a.*
+						from(select * from drink where drink_status='n'
+							 <include refid="searchCondition"/>
+						)a)b 
+				 <include refid="alignCondition"/>)z 
+				 <![CDATA[
+		 		  where rownum <= #startCount# 
+		 		    and rownum >= #endCount# 
+		 		 ]]>
+				 order by rnum desc
+        
+        
+        
+<!--          select b.* 
+		  from(select rownum rnum, a.*
+				from(select * from drink where drink_status='n'
+					<include refid="searchCondition"/>
+				)a)b
+		 <![CDATA[
+		  where b.rnum <= #startCount#
+		    and b.rnum >= #endCount#
+		 ]]> 
+		 order by b.rnum desc -->
+    </select>
+   
+ 	<select id="drinkInfo" parameterClass="map" resultMap="drinkResultMap">
+   
+      SELECT *
+        FROM DRINK
+       WHERE DRINK_STATUS = 'n'
+         AND DRINK_NO = #drink_no#
+   </select>
+   
+	
+   <update id="updateBOHIT" parameterClass="map">
+      UPDATE DRINK
+         SET DRINK_HIT = DRINK_HIT + 1
+       WHERE DRINK_NO = #drink_no#
+   </update>  
+   
+   
+     <update id="updateDrinkInfo" parameterClass="drinkVO">
+      UPDATE DRINK
+         SET 
+            DRINK_ADD = #drink_add#
+            ,DRINK_ZIP = #drink_zip#
+            ,DRINK_ADD2 = #drink_add2#
+            ,DRINK_INFO = #drink_info#
+            ,DRINK_LINK = #drink_link#
+       WHERE DRINK_NO = #drink_no#
+   </update>  
+
+   <update id="deleteDrinkInfo" parameterClass="map">
+      UPDATE DRINK
+         SET DRINK_STATUS ='y'
+       WHERE DRINK_NO = #drink_no#
+   </update>  
+   
+      <select id="totalCount" parameterClass="map" resultClass="string">
+         SELECT COUNT(*) 
+           FROM DRINK
+      	  WHERE DRINK_STATUS ='n'   
+      <include refid="searchCondition"/>   
+      
+      </select>   
+      
+	<select id="drinkListbyName" parameterClass="map" resultClass="drinkVO">
+		select * from drink
+		 where drink_name like '%'||#drink_name#||'%'
+	</select>
+</sqlMap>

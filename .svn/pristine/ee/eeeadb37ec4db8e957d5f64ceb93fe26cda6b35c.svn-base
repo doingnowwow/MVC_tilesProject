@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="reviewFile">
+	<typeAlias alias="reviewFileVO" type="kr.or.ddit.vo.ReviewFileVO"/>
+	
+	<statement id="fileItemList" resultClass="reviewFileVO" >
+		select * from review_file
+		 where review_no=#review_no#
+	</statement>
+	
+	<insert id="insertReviewFile" parameterClass="reviewFileVO">
+		<selectKey keyProperty="rfile_seq">
+			select reviewfile_seq.nextval from dual
+		</selectKey>
+		insert into review_file(RFILE_SEQ,RFILE_NAME,RFILE_SAVE_NAME,RFILE_CONTENT_TYPE,RFILE_SIZE,REVIEW_NO)
+		values(#rfile_seq#,#rfile_name#,#rfile_save_name#,#rfile_content_type#,#rfile_size#,#review_no#)
+	</insert>
+	
+	<select id="fileItemInfo" parameterClass="map" resultClass="reviewFileVO">
+		select * from review_file
+		 where rfile_seq=#rfile_seq#
+	</select>
+</sqlMap>

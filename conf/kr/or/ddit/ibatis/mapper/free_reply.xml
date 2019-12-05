@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="free_reply">
+
+
+    <typeAlias alias="freereplyVO" type="kr.or.ddit.vo.FreeReplyVO"/>
+
+	
+	<select id="rrList" parameterClass="map" resultClass="freereplyVO">
+		select * from free_reply 
+		where fr_status='n'
+		  and free_no=#free_no#
+		  order by fr_group, fr_seq
+	</select>
+	
+	<insert id="insertFreeReply" parameterClass="freereplyVO">
+		<selectKey keyProperty="fr_no">
+			select fr_seq.nextval from dual
+		</selectKey>
+		insert into free_reply(FR_NO,FREE_NO,FR_CONTENT,FR_GROUP,FR_SEQ,FR_DEPTH,MEM_ID)
+		values(#fr_no#,#free_no#,#fr_content#,#fr_no#,#fr_seq#,#fr_depth#,#mem_id#)
+	</insert>
+	
+	<select id="incrementSEQ" parameterClass="freereplyVO" resultClass="String">
+		select max(fr_seq)+1 from free_reply
+		 where fr_status='n'
+		   and fr_group=#fr_group#
+	</select>
+	
+	<update id="updateSEQ" parameterClass="freereplyVO">
+		update free_reply
+		   set fr_seq=fr_seq+1
+		 where fr_status='n'
+		   and fr_group=#fr_group#
+		   and fr_seq > #fr_seq#
+	</update>
+	
+	<insert id="insertFreeReReply" parameterClass="freereplyVO">
+		<selectKey keyProperty="fr_no">
+			select fr_seq.nextval from dual
+		</selectKey>
+		insert into free_reply(FR_NO,FREE_NO,FR_CONTENT,FR_GROUP,FR_SEQ,FR_DEPTH,MEM_ID)
+		values(#fr_no#,#free_no#,#fr_content#,#fr_group#,#fr_seq#,#fr_depth#,#mem_id#)
+	</insert>
+	
+	<update id="deleteFreeReply" parameterClass="map">
+		update free_reply
+		   set fr_status='y'
+		 where fr_no=#fr_no#
+	</update>
+	
+	<update id="updateFreeReply" parameterClass="freereplyVO">
+		update free_reply
+		   set fr_content=#fr_content#
+		 where fr_no=#fr_no#
+	</update>
+	
+</sqlMap>

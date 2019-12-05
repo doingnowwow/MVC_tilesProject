@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap    
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map  2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="company">
+	<typeAlias alias="companyVO" type="kr.or.ddit.vo.CompanyVO" />
+	
+	<insert id="insertCompany" parameterClass="companyVO">
+		insert into com(COM_ID,COM_NAME,COM_PASS,COM_NICKNAME,COM_TEL,COM_EMAIL,COM_BIR)
+		values(#com_id#,#com_name#,#com_pass#,#com_nickname#,#com_tel#,#com_email#,#com_bir#)
+	</insert>
+	
+	<select id="companyInfo" parameterClass="map" resultClass="companyVO">
+		select * from com
+		 where com_delete='n'
+		   and com_id=#com_id#
+		<dynamic>
+			<isNotEmpty property="com_pass" prepend="and">			
+		  		com_pass=#com_pass#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+		
+	<select id="searchId" parameterClass="map" resultClass="String">
+	
+	SELECT COM_ID FROM COM
+	WHERE COM_NAME = #com_name#
+
+	AND COM_EMAIL = #com_email#
+	
+	</select>
+	
+	<select id="searchPwd" parameterClass="map" resultClass="String">
+	
+	SELECT COM_PASS FROM COM
+	WHERE COM_NAME = #com_name#
+	AND COM_ID = #com_id#
+	AND COM_EMAIL = #com_email#
+	
+	</select>
+	
+	<update id="updateCompany" parameterClass="companyVO">
+		update com
+		   set com_nickname=#com_nickname#,
+		   	   com_tel=#com_tel#,
+		   	   com_email=#com_email#,
+		   	   com_pass=#com_pass#
+		 where com_id=#com_id#
+	</update>
+	
+	<update id="deleteCompany" parameterClass="map">
+		update com
+		   set com_delete='y'
+		 where com_id=#com_id#
+	</update>
+	
+	
+	<sql id="searchCondition">
+		<dynamic prepend="AND">
+			<isNotEmpty property="search_keyword"  open="(" close=")">
+					<isEqual property="search_keycode" compareValue="ALL">
+						COM_ID  LIKE '%' || #search_keyword# || '%'
+						OR	COM_NAME LIKE '%' || #search_keyword# || '%'
+					 	OR COM_NICKNAME LIKE '%'|| #search_keyword# || '%'
+					</isEqual>	
+					<isEqual property="search_keycode" compareValue="NAME">
+							COM_NAME LIKE '%' || #search_keyword# || '%'
+					</isEqual>	
+					<isEqual property="search_keycode" compareValue="NICK">
+							 COM_NICKNAME LIKE '%'|| #search_keyword# || '%'
+					</isEqual>
+					<isEqual property="search_keycode" compareValue="ID">
+							COM_ID  LIKE '%' || #search_keyword# || '%'
+					</isEqual>
+				</isNotEmpty>
+		</dynamic>
+	</sql>
+	
+	<select id="companyList" resultClass="companyVO" parameterClass="map">
+
+		SELECT * FROM COM
+		 WHERE COM_DELETE='n'
+		<include refid="searchCondition"/>
+
+	</select>
+	
+	
+	
+</sqlMap>
